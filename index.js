@@ -4,7 +4,7 @@ const app = express();
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const port =  3001;
+const port = process.env.PORT || 3001;
 const uri = process.env.TWEET_X_CLUSTER_URI;
 
 //Connecting to server
