@@ -40,19 +40,25 @@ router.route('/').get(async (req, res) => {
 router.route('/').post(upload.single('postPicture'), async (req, res) => {
 
     const { authorization } = req?.headers
+
+    const Imagefile = {
+        fileName:req?.file?.filename,
+        file:req?.file?.buffer
+    }
    
     if (authorization) {
 
         const { postContent } = req?.body
         const { data } = jwtDecode(authorization)
         const { id } = data;
-
+        console.log(id)
         try {
             const isUser = await user.findById(id);
 
             if (isUser) {
                 // image upload result
-                const result = await uploadToCloudinary(Imagefile?.file);
+                const {file} = Imagefile
+                const result = await uploadToCloudinary(file);
                 const {secure_url} = await result;
 
                 const newPost =  new post({
