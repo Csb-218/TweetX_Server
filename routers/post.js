@@ -2,23 +2,24 @@ const router = require('express').Router();
 const user = require('../models/userModel');
 const post = require('../models/postModel');
 const { jwtDecode } = require("jwt-decode");
-const uploadToCloudinary = require('../controllers/cloudinary')
+const {uploadToCloudinary,deleteFromCloudinary} = require('../controllers/cloudinary')
 const upload = require('../middleware/multer')
 
 // retrieve all posts of a user
 router.route('/').get(async (req, res) => {
-
+  
     const { authorization } = req?.headers
-
-    if (authorization) {
+    // const { data } = jwtDecode(authorization)
+    console.log(authorization)
+    if (authorization?.length >= 200) {
 
         const { data } = jwtDecode(authorization)
-
+  
         const { id, userName, email } = data;
-
-        const query = post.where({
-            postCreator: id
-        });
+        console.log(id, userName, email)
+        const query ={
+            "postCreator.id":{$eq : id} 
+        };
 
         post.find(query)
             .then(response => {
@@ -46,31 +47,35 @@ router.route('/').post(upload.single('postPicture'), async (req, res) => {
         file:req?.file?.buffer
     }
    
-    if (authorization) {
+    if (authorization?.length >= 200) {
 
         const { postContent } = req?.body
         const { data } = jwtDecode(authorization)
         const { id } = data;
         console.log(id)
         try {
-            const isUser = await user.findById(id);
+            const User = await user.findById(id);
 
-            if (isUser) {
+            if (User) {
                 // image upload result
-                const {file} = Imagefile
-                const result = await uploadToCloudinary(file);
-                const {secure_url} = await result;
+                const file = Imagefile?.file
+                const result = file && await uploadToCloudinary(file);
+                const secure_url = await result?.secure_url ;
 
                 const newPost =  new post({
                     postContent: postContent,
                     postPicture: secure_url,
-                    postCreator: id
+                    postCreator:{
+                        userName:User?.userName,
+                        profilePicture:User?.profilePicture,
+                        id:id
+                    } 
                 })
 
                 try {
-                    const response = await newPost.save();
-                    const { _id } = response
-                    console.log(response)
+                    const postResponse = await newPost.save();
+                    const { _id } = postResponse
+                    console.log(postResponse)
 
                     const update = {
                         $push: {
@@ -85,7 +90,7 @@ router.route('/').post(upload.single('postPicture'), async (req, res) => {
                     user?.findByIdAndUpdate(id, update, options)
                         .then(response => {
                             console.log(response)
-                            res.status(200).json({ code: 'post created successfully !' })
+                            res.status(200).json({ post: postResponse })
                         })
                         .catch(err => {
                             console.log(err)
@@ -113,7 +118,7 @@ router.route('/:postId').delete(async (req, res) => {
     const { authorization } = req?.headers
     const { postId } = req?.params
 
-    if (authorization) {
+    if (authorization?.length >= 200) {
         const { data } = jwtDecode(authorization)
 
         const { id } = data;
@@ -130,7 +135,11 @@ router.route('/:postId').delete(async (req, res) => {
 
         try {
             const response = await user.findByIdAndUpdate(id, update, options)
-            console.log(response)
+            console.log(response) 
+
+            // deleteFromCloudinary()
+
+     
 
             post.findByIdAndDelete(postId)
                 .then(response => {
@@ -157,7 +166,7 @@ router.route('/:postId').get(async (req, res) => {
 
     const { authorization } = req?.headers
 
-    if (authorization) {
+    if (authorization?.length >= 200) {
         const { data } = jwtDecode(authorization)
         const {postId} = req?.params
         const { id } = data;
