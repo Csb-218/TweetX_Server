@@ -29,7 +29,14 @@ const uploadToCloudinary = (fileBuffer) => {
       ).end(fileBuffer);
     });
   };
+
+
+  const deleteFromCloudinary = async(file) => {
+
+    cloudinary.v2.uploader
+    .destroy(file)
+    .then(result=>console.log(result));
+
+  }
   
-  module.exports = uploadToCloudinary ;
-// Log the configuration
-// console.log(cloudinary.config());
+  module.exports = {uploadToCloudinary,deleteFromCloudinary} ;
