@@ -1,16 +1,16 @@
 const router = require('express').Router();
 const axios = require('axios')
 const post = require('../models/postModel');
-
+const { jwtDecode } = require("jwt-decode");
 
 require('dotenv').config();
 
 // retrieve user feed
 router.route('/').get(async (req, res) => {
 
-    const { authorization } = req?.headers
-
-    if (authorization) {
+    const  authorization  = req?.headers?.authorization 
+    
+    if (authorization?.length >= 200) {
        
         try {
 
@@ -19,28 +19,36 @@ router.route('/').get(async (req, res) => {
                 url: `${process.env.BASE_URL}/user/following`,
                 headers: {
                     Authorization: `${authorization}`
-                }
+                } 
             };
             const response = await axios.request(options)
 
             if (response.status === 200) {
 
-                const { following } = response?.data
+                const { data } = jwtDecode(authorization)
+                const { id } = data;
+                 
+                const following = response?.data?.following?.map(followed => followed?._id)
 
-                const query = post.where({
-                    postCreator: { $in: following }
-                });
+                // console.log(response,id,following)
 
-                post.find(query)
-                    .then(response => {
-                        console.log(response)
+                const idsArray = [...following,id]
+
+                console.log(1111,idsArray,8989)
+
+                const query ={
+                        'postCreator.id': { $in: idsArray }
+                }
+
+                post.find(query)      
+                    .then(response => {    
+                        console.log(response,7777)
                         res.status(200).json({ feed: response })
                     })
                     .catch(error => {
                         console.log(error)
                         res.status(404).json({ error: 'ERR_BAD_REQUEST' })
                     })
-                    ;
 
             }
 
