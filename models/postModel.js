@@ -2,12 +2,16 @@ const mongoose = require('mongoose');
 
 const {Schema,SchemaTypes} = mongoose;
 
-const {String,Mixed,ObjectId,} = SchemaTypes
+const {String,ObjectId} = SchemaTypes
 
 const postSchema = new Schema({
     postContent : String ,
     postPicture : String,
-    postCreator : ObjectId
+    postCreator : {
+        userName:{type:String, required:true},
+        profilePicture:String,
+        id:ObjectId
+    }
 }
 ,
 {
