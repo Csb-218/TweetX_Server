@@ -21,7 +21,7 @@ router.route('/').get(async (req, res) => {
             "postCreator.id":{$eq : id} 
         };
 
-        post.find(query)
+        post.find(query).sort({ updatedAt: -1 })
             .then(response => {
                 console.log(response)
                 res.status(200).json({ posts: response})

@@ -40,7 +40,7 @@ router.route('/').get(async (req, res) => {
                         'postCreator.id': { $in: idsArray }
                 }
 
-                post.find(query)      
+                post.find(query).sort({ updatedAt: -1 })     
                     .then(response => {    
                         console.log(response,7777)
                         res.status(200).json({ feed: response })
