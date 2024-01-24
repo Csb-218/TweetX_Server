@@ -263,7 +263,7 @@ router.route('/follow/:userId').get(async (req, res) => {
       // adding user into another user's followers list
       const followerResult = await user.findByIdAndUpdate(userId, updateFollower, options)
 
-      followRes && followerResult && res.status(200).json({ following: followRes, followers: followerResult })
+      followRes && followerResult && res.status(200).json({ followed : userId })
     }
     catch (error) {
       res.status(400).json({ message: 'ERR_BAD_REQUEST' })
@@ -309,7 +309,7 @@ router.route('/unfollow/:userId').get(async (req, res) => {
       // adding user into another user's followers list
       const followerResult = await user.findByIdAndUpdate(userId, updateFollower, options)
 
-      followRes && followerResult && res.status(200).json({ following: followRes, followers: followerResult })
+      followRes && followerResult && res.status(200).json({ unfollowed : userId })
     }
     catch (error) {
       res.status(400).json({ message: 'ERR_BAD_REQUEST' })
