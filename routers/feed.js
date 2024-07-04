@@ -60,7 +60,15 @@ router.route('/').get(async (req, res) => {
         }
     }
     else {
-        res.status(401).json({ code: 'UNAUTHORISED REQUEST' })
+        console.error(9999)
+        post.find({}).then(response => {    
+                        console.log(response,7777)
+                        res.status(200).json({ feed: response })
+                    })
+                    .catch(error => {
+                        console.log(error)
+                        res.status(404).json({ error: 'ERR_BAD_REQUEST' })
+                    })
     }
 })
 
